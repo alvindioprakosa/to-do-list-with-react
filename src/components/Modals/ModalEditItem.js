@@ -94,12 +94,12 @@ function ModalEditItem({ show, handleClose, title, text, editedItem }) {
         onHide={handleClose}
         className="modal-add-activity"
         size="md"
-        aria-labelledby="contained-modal-title-vcenter"
+        aria-labelledby="contained-modal-title"
         centered
         id="ModalUpdate"
       >
         <Modal.Header>
-          <Modal.Title id="contained-modal-title-vcenter" className="pt-4">
+          <Modal.Title id="contained-modal-title" className="pt-4">
             <h4 className="font-weight-bold">Edit Item</h4>
             <div className="icon-close" onClick={handleClose}></div>
           </Modal.Title>

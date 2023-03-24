@@ -52,7 +52,7 @@ function ModalAddItem({ show, handleClose, title, text }) {
 
   const formatOptionLabel = ({ value, label }) => (
     <div
-      data-cy="modal-add-priority-item"
+      data-cy="modal-add-item"
       className="d-flex align-items-center"
     >
       <div className={`label-indicator ${value}`}></div>
@@ -70,7 +70,7 @@ function ModalAddItem({ show, handleClose, title, text }) {
   };
 
   const DropdownIndicator = () => {
-    return <div data-cy="modal-add-priority-dropdown" className="icon-dropdown mr-2"></div>;
+    return <div data-cy="modal-add-dropdown" className="icon-dropdown mr-2"></div>;
   };
 
   return (
@@ -105,7 +105,7 @@ function ModalAddItem({ show, handleClose, title, text }) {
                 id="AddFormTitle"
               />
             </div>
-            <label data-cy="modal-add-priority-title">PRIORITY</label>
+            <label data-cy="modal-add-title">PRIORITY</label>
             <br />
             <Select
               defaultValue={options[0]}

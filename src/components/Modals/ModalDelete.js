@@ -58,13 +58,13 @@ function ModalDelete({
         onHide={handleClose}
         className="modal-delete"
         size="md"
-        aria-labelledby="contained-modal-title-vcenter"
+        aria-labelledby="contained-modal-title"
         centered
         id="ModalDelete"
         data-cy="todo-modal-delete"
       >
         <Modal.Header>
-          <Modal.Title id="contained-modal-title-vcenter" className="pt-4">
+          <Modal.Title id="contained-modal-title" className="pt-4">
             <img src={alertIcon} alt="alert" data-cy="modal-delete-icon" />
             <h4 className="font-weight-bold" data-cy="modal-delete-title">{title}</h4>
           </Modal.Title>

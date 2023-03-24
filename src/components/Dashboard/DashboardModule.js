@@ -130,7 +130,7 @@ function DashboardModule() {
             }
             {dataGetActivities?.data?.map((item, key) => (
               <div key={item?.id} className="col-3">
-                <div className="activity-card" data-cy="activity-item" id={`itemTodo${key}`}>
+                <div className="activity-card" data-cy="activity-item-dashboard" id={`itemTodo${key}`}>
                   <div
                     className="activity-body"
                     onClick={() => history.push(`/detail/${item?.id}`)}
@@ -138,7 +138,7 @@ function DashboardModule() {
                     <h4 data-cy="activity-item-title">{item?.title}</h4>
                   </div>
                   <div className="card-footer">
-                    <span data-cy="activity-item-date">
+                    <span data-cy="activity-item-date-create">
                       {dayjs(item?.created_at)
                         .locale("id")
                         .format("DD MMMM YYYY")}
@@ -147,7 +147,7 @@ function DashboardModule() {
                       src={deleteIcon}
                       onClick={() => handleClickDelete(item)}
                       alt="delete"
-                      data-cy="activity-item-delete-button"
+                      data-cy="activity-item-button-delete"
                     />
                   </div>
                 </div>
