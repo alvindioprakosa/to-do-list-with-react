@@ -16,7 +16,7 @@ function TodoDetail() {
   const getTodoDetail = (data) => dispatch(TodoActions.getActivityDetailRequest(data))
   useEffect(() => {
     titlePage({
-      title: "To Do List Yan - Detail",
+      title: "To Do List - Detail",
     });
     getTodoDetail(params)
     // eslint-disable-next-line react-hooks/exhaustive-deps

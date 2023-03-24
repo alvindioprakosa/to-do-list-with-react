@@ -2,7 +2,7 @@ import React from "react";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import store from "./redux/store";
-import Routes from "./Router/Routes";
+import Routes from "./Routes";
 
 function App() {
   return (

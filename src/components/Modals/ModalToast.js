@@ -9,7 +9,7 @@ function ModalToast({ show, handleClose, title, text, type }) {
         onHide={handleClose}
         className="modal-toast"
         size="md"
-        aria-labelledby="contained-modal-title"
+        aria-labelledby="contained-modal-title-vcenter"
         centered
       >
         <Modal.Body onClick={handleClose} >
