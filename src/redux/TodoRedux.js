@@ -271,8 +271,6 @@ export const updateItemFailure = (state, action) => {
   });
 };
 
-
-
 /* --------delete item-------- */
 
 // request the data from an api
