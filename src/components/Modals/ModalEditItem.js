@@ -12,7 +12,7 @@ function ModalEditItem({ show, handleClose, title, text, editedItem }) {
   const resetState = () => dispatch(TodoActions.resetStateTodo());
   const updateItem = (data) => dispatch(TodoActions.updateItemRequest(data));
   const getActivityDetail = (data) =>
-  dispatch(TodoActions.getActivityDetailRequest(data));
+    dispatch(TodoActions.getActivityDetailRequest(data));
 
   const { isLoadingUpdateItem, errUpdateItem, dataUpdateItem } = useSelector(
     (state) => state.todo
@@ -20,14 +20,14 @@ function ModalEditItem({ show, handleClose, title, text, editedItem }) {
 
   const [itemName, setItemName] = useState("");
   const [priority, setPriority] = useState("very-high");
-  const [selectState, setSelectState] = useState({})
+  const [selectState, setSelectState] = useState({});
 
   useEffect(() => {
     if (errUpdateItem !== null) {
       handleClose();
       resetState();
     } else if (dataUpdateItem && show) {
-      getActivityDetail(params)
+      getActivityDetail(params);
       handleClose();
       resetState();
     }
@@ -59,12 +59,14 @@ function ModalEditItem({ show, handleClose, title, text, editedItem }) {
 
   useEffect(() => {
     if (editedItem) {
-      setItemName(editedItem.title)
-      setPriority(editedItem.priority)
-      setSelectState(options.find(option => option.value === editedItem.priority))
+      setItemName(editedItem.title);
+      setPriority(editedItem.priority);
+      setSelectState(
+        options.find((option) => option.value === editedItem.priority)
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [show])
+  }, [show]);
 
   const formatOptionLabel = ({ value, label }) => (
     <div className="d-flex align-items-center">
@@ -77,15 +79,15 @@ function ModalEditItem({ show, handleClose, title, text, editedItem }) {
     const data = {
       title: itemName,
       priority,
-      is_active: editedItem.is_active
-    }
-    updateItem({data, id: editedItem.id});
+      is_active: editedItem.is_active,
+    };
+    updateItem({ data, id: editedItem.id });
   };
 
   const handleChangeSelect = (e) => {
-    setSelectState(e)
-    setPriority(e.value)
-  }
+    setSelectState(e);
+    setPriority(e.value);
+  };
 
   return (
     <div>

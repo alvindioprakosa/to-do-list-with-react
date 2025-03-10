@@ -6,19 +6,18 @@ import { Creators as TodoActions } from "../redux/TodoRedux";
 const TodoDetailModule = lazy(() =>
   import("../components/TodoDetail/TodoDetailModule")
 );
-const Header = lazy(() =>
-  import("../layout/Header")
-);
+const Header = lazy(() => import("../layout/Header"));
 
 function TodoDetail() {
-  const params = useParams().todoId
-  const dispatch = useDispatch()
-  const getTodoDetail = (data) => dispatch(TodoActions.getActivityDetailRequest(data))
+  const params = useParams().todoId;
+  const dispatch = useDispatch();
+  const getTodoDetail = (data) =>
+    dispatch(TodoActions.getActivityDetailRequest(data));
   useEffect(() => {
     titlePage({
       title: "To Do List - Detail",
     });
-    getTodoDetail(params)
+    getTodoDetail(params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

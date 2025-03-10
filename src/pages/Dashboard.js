@@ -5,10 +5,7 @@ import { Creators as TodoActions } from "../redux/TodoRedux";
 const DashboardModule = lazy(() =>
   import("../components/Dashboard/DashboardModule")
 );
-const Header = lazy(() =>
-  import("../layout/Header")
-);
-
+const Header = lazy(() => import("../layout/Header"));
 
 function Dashboard() {
   const dispatch = useDispatch();
