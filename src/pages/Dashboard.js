@@ -1,26 +1,31 @@
-import React, { lazy, Suspense, useEffect } from "react";
+import React, { lazy, Suspense, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { titlePage } from "../lib/titleHead";
 import { Creators as TodoActions } from "../redux/TodoRedux";
-const DashboardModule = lazy(() =>
-  import("../components/Dashboard/DashboardModule")
-);
+
+// Lazy load components
+const DashboardModule = lazy(() => import("../components/Dashboard/DashboardModule"));
 const Header = lazy(() => import("../layout/Header"));
 
 function Dashboard() {
   const dispatch = useDispatch();
-  const getActivities = () => dispatch(TodoActions.getActivitiesRequest());
+  
+  // Gunakan useCallback untuk menghindari pembuatan ulang fungsi di setiap render
+  const getActivities = useCallback(() => {
+    dispatch(TodoActions.getActivitiesRequest());
+  }, [dispatch]);
+
   useEffect(() => {
-    titlePage({
-      title: "To Do List - Dashboard",
-    });
+    titlePage({ title: "To Do List - Dashboard" });
     getActivities();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getActivities]);
+
   return (
-    <Suspense fallback={<p>Loading...</p>}>
-      <Header />
-      <DashboardModule />
+    <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+      <>
+        <Header />
+        <DashboardModule />
+      </>
     </Suspense>
   );
 }
