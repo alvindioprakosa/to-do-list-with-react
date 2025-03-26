@@ -1,21 +1,26 @@
 import dayjs from "dayjs";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import deleteIcon from "../../assets/images/icon-delete.svg";
-import ModalDelete from "../Modals/ModalDelete";
-import "dayjs/locale/id";
-import ModalToast from "../Modals/ModalToast";
-import { Creators as TodoActions } from "../../redux/TodoRedux";
 import emptyItem from "../../assets/images/empty-activity.png";
+import ModalDelete from "../Modals/ModalDelete";
+import ModalToast from "../Modals/ModalToast";
+import "dayjs/locale/id";
+import { Creators as TodoActions } from "../../redux/TodoRedux";
 
 function DashboardModule() {
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const getActivities = () => dispatch(TodoActions.getActivitiesRequest());
-  const addActivity = (data) => dispatch(TodoActions.addActivityRequest(data));
-  const resetState = () => dispatch(TodoActions.resetStateTodo());
+
+  // Gunakan useCallback agar fungsi tidak dibuat ulang di setiap render
+  const getActivities = useCallback(() => dispatch(TodoActions.getActivitiesRequest()), [dispatch]);
+  const addActivity = useCallback(() => {
+    dispatch(TodoActions.addActivityRequest({ title: "New Activity", email: "mail.yanafriyoko@gmail.com" }));
+  }, [dispatch]);
+
+  // Ambil data dari Redux Store
   const {
     dataGetActivities,
     errGetActivities,
@@ -26,66 +31,36 @@ function DashboardModule() {
     errDeleteActivity,
     isLoadingAddActivity,
   } = useSelector((state) => state.todo);
+
+  // State untuk modal
   const [showDelete, setShowDelete] = useState(false);
   const [modalText, setModalText] = useState("Activity berhasil dihapus");
   const [showToast, setShowToast] = useState(false);
   const [toastType, setToastType] = useState("danger");
   const [deletedActivity, setDeletedActivity] = useState("");
 
+  // Gunakan useEffect untuk menangani perubahan data dari Redux
   useEffect(() => {
-    if (errAddActivity !== null) {
+    if (errAddActivity || errGetActivities || errDeleteActivity) {
       setShowToast(true);
       setToastType("danger");
-      errAddActivity
-        ? setModalText(errAddActivity)
-        : setModalText("Gagal menambahkan activity");
-      resetState();
+      setModalText(errAddActivity || errGetActivities || errDeleteActivity || "Terjadi kesalahan.");
     }
-    if (dataAddActivity) {
-      getActivities();
-      resetState();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errAddActivity, dataAddActivity]);
-
-  useEffect(() => {
-    if (errGetActivities !== null) {
-      setShowToast(true);
-      setToastType("danger");
-      errGetActivities
-        ? setModalText(errGetActivities)
-        : setModalText("Terjadi kesalahan. Gagal memuat list activity");
-      resetState();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errGetActivities]);
-
-  useEffect(() => {
-    if (errDeleteActivity !== null) {
-      setShowToast(true);
-      setToastType("danger");
-      errDeleteActivity
-        ? setModalText(errDeleteActivity)
-        : setModalText("Gagal menghapus activity");
-    }
-    if (dataDeleteActivity) {
+    if (dataAddActivity || dataDeleteActivity) {
       getActivities();
       setShowToast(true);
       setToastType("success");
-      setModalText("Activity berhasil dihapus");
+      setModalText(dataDeleteActivity ? "Activity berhasil dihapus" : "Activity berhasil ditambahkan");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errDeleteActivity, dataDeleteActivity]);
+  }, [errAddActivity, errGetActivities, errDeleteActivity, dataAddActivity, dataDeleteActivity, getActivities]);
 
-  const handleAddActivity = () => {
-    addActivity({ title: "New Activity", email: "mail.yanafriyoko@gmail.com" });
-  };
+  // Menggunakan useMemo untuk menghindari perhitungan ulang yang tidak perlu
+  const activities = useMemo(() => dataGetActivities?.data || [], [dataGetActivities]);
 
+  // Handler untuk modal delete
   const handleClickDelete = (item) => {
     setShowDelete(true);
-    setModalText(
-      `<p>Apakah anda yakin menghapus activity <strong>“${item?.title}”</strong>?</p>`
-    );
+    setModalText(`<p>Apakah anda yakin menghapus activity <strong>“${item?.title}”</strong>?</p>`);
     setDeletedActivity(item?.id);
   };
 
@@ -93,69 +68,39 @@ function DashboardModule() {
     <div className="container">
       <div className="todo-header">
         <h1 data-cy="activity-title">Activity</h1>
-        <button
-          className="btn btn-primary"
-          data-cy="activity-add-button"
-          onClick={handleAddActivity}
-        >
+        <button className="btn btn-primary" data-cy="activity-add-button" onClick={addActivity}>
           {isLoadingAddActivity ? (
-            <Spinner
-              as="span"
-              animation="border"
-              size="md"
-              role="status"
-              aria-hidden="true"
-            />
+            <Spinner as="span" animation="border" size="md" role="status" aria-hidden="true" />
           ) : (
             <>
-              <span className="icon-plus"></span> {"Tambah"}
+              <span className="icon-plus"></span> Tambah
             </>
           )}
         </button>
       </div>
+
       <div className="dashboard-content">
         {isLoadingGetActivities ? (
           <div className="spinner-wrapper">
-            <Spinner
-              as="span"
-              animation="border"
-              size="lg"
-              role="status"
-              aria-hidden="true"
-            />
+            <Spinner as="span" animation="border" size="lg" role="status" aria-hidden="true" />
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="empty-item" data-cy="activity-empty-state">
+            <img src={emptyItem} alt="empty" onClick={addActivity} />
           </div>
         ) : (
           <div className="row">
-            {dataGetActivities?.data?.length < 1 && (
-              <div className="empty-item" data-cy="activity-empty-state">
-                <img src={emptyItem} alt="empty" onClick={handleAddActivity} />
-              </div>
-            )}
-            {dataGetActivities?.data?.map((item, key) => (
-              <div key={item?.id} className="col-3">
-                <div
-                  className="activity-card"
-                  data-cy="activity-item"
-                  id={`itemTodo${key}`}
-                >
-                  <div
-                    className="activity-body"
-                    onClick={() => history.push(`/detail/${item?.id}`)}
-                  >
-                    <h4 data-cy="activity-item-title">{item?.title}</h4>
+            {activities.map((item, key) => (
+              <div key={item.id} className="col-3">
+                <div className="activity-card" data-cy="activity-item" id={`itemTodo${key}`}>
+                  <div className="activity-body" onClick={() => navigate(`/detail/${item.id}`)}>
+                    <h4 data-cy="activity-item-title">{item.title}</h4>
                   </div>
                   <div className="card-footer">
                     <span data-cy="activity-item-date">
-                      {dayjs(item?.created_at)
-                        .locale("id")
-                        .format("DD MMMM YYYY")}
+                      {dayjs(item.created_at).locale("id").format("DD MMMM YYYY")}
                     </span>
-                    <img
-                      src={deleteIcon}
-                      onClick={() => handleClickDelete(item)}
-                      alt="delete"
-                      data-cy="activity-item-delete-button"
-                    />
+                    <img src={deleteIcon} onClick={() => handleClickDelete(item)} alt="delete" data-cy="activity-item-delete-button" />
                   </div>
                 </div>
               </div>
@@ -163,18 +108,9 @@ function DashboardModule() {
           </div>
         )}
       </div>
-      <ModalDelete
-        text={modalText}
-        show={showDelete}
-        deletedItem={deletedActivity}
-        handleClose={() => setShowDelete(false)}
-      />
-      <ModalToast
-        type={toastType}
-        text={modalText}
-        show={showToast}
-        handleClose={() => setShowToast(false)}
-      />
+
+      <ModalDelete text={modalText} show={showDelete} deletedItem={deletedActivity} handleClose={() => setShowDelete(false)} />
+      <ModalToast type={toastType} text={modalText} show={showToast} handleClose={() => setShowToast(false)} />
     </div>
   );
 }
