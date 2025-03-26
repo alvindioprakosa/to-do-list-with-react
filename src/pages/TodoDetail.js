@@ -1,29 +1,35 @@
-import React, { lazy, Suspense, useEffect } from "react";
+import React, { lazy, Suspense, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom"; // Gunakan `react-router-dom`
 import { titlePage } from "../lib/titleHead";
 import { Creators as TodoActions } from "../redux/TodoRedux";
-const TodoDetailModule = lazy(() =>
-  import("../components/TodoDetail/TodoDetailModule")
-);
+
+// Lazy load components
+const TodoDetailModule = lazy(() => import("../components/TodoDetail/TodoDetailModule"));
 const Header = lazy(() => import("../layout/Header"));
 
 function TodoDetail() {
-  const params = useParams().todoId;
+  const { todoId } = useParams(); // Destructuring lebih jelas
   const dispatch = useDispatch();
-  const getTodoDetail = (data) =>
-    dispatch(TodoActions.getActivityDetailRequest(data));
+
+  // Gunakan useCallback agar tidak membuat ulang fungsi setiap render
+  const getTodoDetail = useCallback((id) => {
+    dispatch(TodoActions.getActivityDetailRequest(id));
+  }, [dispatch]);
+
   useEffect(() => {
-    titlePage({
-      title: "To Do List - Detail",
-    });
-    getTodoDetail(params);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    titlePage({ title: "To Do List - Detail" });
+    if (todoId) {
+      getTodoDetail(todoId);
+    }
+  }, [todoId, getTodoDetail]); // Tambahkan dependency
+
   return (
-    <Suspense fallback={<p>Loading...</p>}>
-      <Header />
-      <TodoDetailModule />
+    <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+      <>
+        <Header />
+        <TodoDetailModule />
+      </>
     </Suspense>
   );
 }
