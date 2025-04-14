@@ -1,7 +1,4 @@
-import React from "react";
-import { Modal } from "react-bootstrap";
-
-function ModalToast({ show, handleClose, title, text, type }) {
+function ModalToast({ show, handleClose, title, text, type = "success" }) {
   return (
     <div data-cy="modal-information">
       <Modal
@@ -12,18 +9,19 @@ function ModalToast({ show, handleClose, title, text, type }) {
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
+        {title && (
+          <Modal.Header closeButton>
+            <Modal.Title data-cy="modal-information-title">{title}</Modal.Title>
+          </Modal.Header>
+        )}
         <Modal.Body onClick={handleClose}>
           <div
             data-cy="modal-information-icon"
             className={type === "success" ? "icon-alert-sm" : "icon-danger-sm"}
           ></div>
-          <p data-cy="modal-information-title" className="pl-3 pr-3">
-            {text}
-          </p>
+          <p className="pl-3 pr-3">{text}</p>
         </Modal.Body>
       </Modal>
     </div>
   );
 }
-
-export default ModalToast;
