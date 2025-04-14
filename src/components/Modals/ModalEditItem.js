@@ -1,10 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Form, Modal, Spinner } from "react-bootstrap";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router";
 import Select from "react-select";
 import { Creators as TodoActions } from "../../redux/TodoRedux";
+
+// Prioritas item (diletakkan di luar untuk efisiensi)
+const PRIORITY_OPTIONS = [
+  { value: "very-high", label: "Very High" },
+  { value: "high", label: "High" },
+  { value: "normal", label: "Medium" },
+  { value: "low", label: "Low" },
+  { value: "very-low", label: "Very Low" },
+];
 
 function ModalEditItem({ show, handleClose, title, text, editedItem }) {
   const params = useParams().todoId;
@@ -22,6 +30,7 @@ function ModalEditItem({ show, handleClose, title, text, editedItem }) {
   const [priority, setPriority] = useState("very-high");
   const [selectState, setSelectState] = useState({});
 
+  // Sync redux response
   useEffect(() => {
     if (errUpdateItem !== null) {
       handleClose();
@@ -31,42 +40,18 @@ function ModalEditItem({ show, handleClose, title, text, editedItem }) {
       handleClose();
       resetState();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errUpdateItem, dataUpdateItem]);
 
-  const options = [
-    {
-      value: "very-high",
-      label: "Very High",
-    },
-    {
-      value: "high",
-      label: "High",
-    },
-    {
-      value: "normal",
-      label: "Medium",
-    },
-    {
-      value: "low",
-      label: "Low",
-    },
-    {
-      value: "very-low",
-      label: "Very Low",
-    },
-  ];
-
+  // Sync form state with edited item
   useEffect(() => {
     if (editedItem) {
-      setItemName(editedItem.title);
-      setPriority(editedItem.priority);
+      setItemName(editedItem.title || "");
+      setPriority(editedItem.priority || "very-high");
       setSelectState(
-        options.find((option) => option.value === editedItem.priority)
+        PRIORITY_OPTIONS.find((option) => option.value === editedItem.priority)
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [show]);
+  }, [show, editedItem]);
 
   const formatOptionLabel = ({ value, label }) => (
     <div className="d-flex align-items-center">
@@ -75,80 +60,82 @@ function ModalEditItem({ show, handleClose, title, text, editedItem }) {
     </div>
   );
 
+  const handleChangeSelect = useCallback((e) => {
+    setSelectState(e);
+    setPriority(e.value);
+  }, []);
+
   const submitAdd = () => {
+    const trimmedName = itemName.trim();
+    if (!trimmedName) return;
+
     const data = {
-      title: itemName,
+      title: trimmedName,
       priority,
       is_active: editedItem.is_active,
     };
+
     updateItem({ data, id: editedItem.id });
   };
 
-  const handleChangeSelect = (e) => {
-    setSelectState(e);
-    setPriority(e.value);
-  };
-
   return (
-    <div>
-      <Modal
-        show={show}
-        onHide={handleClose}
-        className="modal-add-activity"
-        size="md"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-        id="ModalUpdate"
-      >
-        <Modal.Header>
-          <Modal.Title id="contained-modal-title-vcenter" className="pt-4">
-            <h4 className="font-weight-bold">Edit Item</h4>
-            <div className="icon-close" onClick={handleClose}></div>
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Group>
-            <label>NAMA LIST ITEM</label>
-            <Form.Control
-              onChange={(e) => setItemName(e.target.value)}
-              placeholder="Tambahkan nama Activity"
-              value={itemName}
+    <Modal
+      show={show}
+      onHide={handleClose}
+      className="modal-add-activity"
+      size="md"
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+      id="ModalUpdate"
+    >
+      <Modal.Header>
+        <Modal.Title id="contained-modal-title-vcenter" className="pt-4">
+          <h4 className="font-weight-bold">Edit Item</h4>
+        </Modal.Title>
+        <div className="icon-close" onClick={handleClose}></div>
+      </Modal.Header>
+      <Modal.Body>
+        <Form.Group>
+          <label>NAMA LIST ITEM</label>
+          <Form.Control
+            autoFocus
+            onChange={(e) => setItemName(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && submitAdd()}
+            placeholder="Tambahkan nama Activity"
+            value={itemName}
+          />
+          <label className="mt-3">PRIORITY</label>
+          <Select
+            formatOptionLabel={formatOptionLabel}
+            options={PRIORITY_OPTIONS}
+            className="select-priority"
+            onChange={handleChangeSelect}
+            value={selectState}
+            id="UpdateFormPriority"
+          />
+        </Form.Group>
+      </Modal.Body>
+      <Modal.Footer className="pb-4">
+        <button
+          className="btn btn-primary"
+          onClick={submitAdd}
+          disabled={itemName.trim() === ""}
+          id="UpdateFormSubmit"
+        >
+          {isLoadingUpdateItem ? (
+            <Spinner
+              as="span"
+              animation="border"
+              size="md"
+              role="status"
+              aria-hidden="true"
             />
-            <label>PRIORITY</label>
-            <br />
-            <Select
-              defaultValue={options[0]}
-              formatOptionLabel={formatOptionLabel}
-              options={options}
-              className="select-priority"
-              onChange={(e) => handleChangeSelect(e)}
-              value={selectState}
-              id="UpdateFormPriority"
-            />
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer className="pb-4">
-          <button
-            className="btn btn-primary"
-            onClick={submitAdd}
-            disabled={itemName === ""}
-            id="UpdateFormSubmit"
-          >
-            {isLoadingUpdateItem ? (
-              <Spinner
-                as="span"
-                animation="border"
-                size="md"
-                role="status"
-                aria-hidden="true"
-              />
-            ) : (
-              "Simpan"
-            )}
-          </button>
-        </Modal.Footer>
-      </Modal>
-    </div>
+          ) : (
+            "Simpan"
+          )}
+        </button>
+      </Modal.Footer>
+    </Modal>
   );
 }
 
